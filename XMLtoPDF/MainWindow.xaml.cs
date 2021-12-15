@@ -8,7 +8,7 @@ namespace XMLtoPDF
     /// </summary>
     public partial class MainWindow : Window
     {
-        private List<Person> people = new List<Person>();
+        private List<Person> _people = new List<Person>();
 
         public MainWindow()
         {
@@ -17,30 +17,31 @@ namespace XMLtoPDF
 
         private void ButtonSelect_Click(object sender, RoutedEventArgs e)
         {
-            Program program = new Program();
-
-            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog
+            Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
                 Filter = "XML documents (*.xml)|*.xml|All Files (*.*)|*.*",
-                Multiselect = false
+                Multiselect = false,
+                CheckFileExists = true
             };
 
-            if (dlg.ShowDialog() == true)
+            if (openFileDialog.ShowDialog() == true)
             {
-                program.GetPeopleFromXml(dlg.FileName, ref people);
-            }
-
-            if (people.Count != 0)
-            {
-                textBlockFile.Text = dlg.FileName;
+                if (Program.GetPeopleFromXml(openFileDialog.FileName, out _people))
+                {
+                    textBlockFile.Text = openFileDialog.FileName;
+                }
             }
         }
 
         private void ButtonSave_Click(object sender, RoutedEventArgs e)
         {
-            Program program = new Program();
+            if (_people.Count == 0)
+            {
+                Program.Error("Список пустой");
+                return;
+            }
 
-            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog
+            Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog
             {
                 Filter = "PDF document (*.pdf)|*.pdf",
                 CheckFileExists = false,
@@ -49,14 +50,9 @@ namespace XMLtoPDF
                 FileName = "result.pdf"
             };
 
-            if (people.Count == 0)
+            if (saveFileDialog.ShowDialog() == true)
             {
-                program.Error("Нечего сохранить");
-            }
-            else if (dlg.ShowDialog() == true)
-            {
-                program.SavePDF(dlg.FileName, people);
-                program.Succes("Сохранено успешно");
+                Program.SavePDF(saveFileDialog.FileName, _people);
             }
         }
     }

@@ -8,31 +8,32 @@ using System.Xml;
 
 namespace XMLtoPDF
 {
-    class Program
+    static class Program
     {
         /// <summary>
         /// Создает список из xml документа
         /// </summary>
         /// <param name="filename"></param>
-        /// <param name="people"></param>
-        public void GetPeopleFromXml(string filename, ref List<Person> people)
+        public static bool GetPeopleFromXml(string filename, out List<Person> people)
         {
-            // Создание xml документа
-            XmlDocument xmlDocument = new XmlDocument();
-            // Открытие xml документа
-            xmlDocument.Load(filename);
-            // Получение главного корня
-            XmlElement xmlRoot = xmlDocument.DocumentElement;
+            people = new();
 
-            // Наполняет список данными
-            foreach (XmlNode xmlNode in xmlRoot)
+            try
             {
-                string name = null;
-                int age = 0;
-                string company = null;
+                // Создание xml документа
+                XmlDocument xmlDocument = new XmlDocument();
+                // Открытие xml документа
+                xmlDocument.Load(filename);
+                // Получение главного корня
+                XmlElement xmlRoot = xmlDocument.DocumentElement;
 
-                try
+                // Наполняет список данными
+                foreach (XmlNode xmlNode in xmlRoot)
                 {
+                    string name = null;
+                    int age = 0;
+                    string company = null;
+
                     foreach (XmlNode childNode in xmlNode.ChildNodes)
                     {
                         switch (childNode.Name)
@@ -48,16 +49,18 @@ namespace XMLtoPDF
                                 break;
                         }
                     }
-                }
-                catch (Exception ex)
-                {
-                    Error(ex.Message);
-                    people.Clear();
-                    break;
-                }
 
-                people.Add(new Person(name, age, company));
+                    people.Add(new Person(name, age, company));
+                }
             }
+            catch (Exception ex)
+            {
+                Error(ex.Message);
+                people.Clear();
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -65,8 +68,9 @@ namespace XMLtoPDF
         /// </summary>
         /// <param name="filename"></param>
         /// <param name="people"></param>
-        public void SavePDF(string filename, List<Person> people)
+        public static void SavePDF(string filename, List<Person> people)
         {
+            // Сортировка
             people.Sort((a, b) => a.Company.CompareTo(b.Company));
 
             // Создание pdf документа
@@ -103,9 +107,11 @@ namespace XMLtoPDF
 
             // Закрытие pdf документа
             doc.Close();
+
+            Succes("Сохранено успешно");
         }
 
-        public void Error(string message)
+        public static void Error(string message)
         {
             string messageBoxText = message;
             string caption = "Error";
@@ -115,7 +121,7 @@ namespace XMLtoPDF
             MessageBox.Show(messageBoxText, caption, button, icon);
         }
 
-        public void Succes(string message)
+        public static void Succes(string message)
         {
             string messageBoxText = message;
             string caption = "Succes";

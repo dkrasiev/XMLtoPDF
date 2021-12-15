@@ -2,9 +2,9 @@
 {
     class Person
     {
-        public string Name { get; set; }
-        public int Age { get; set; }
-        public string Company { get; set; }
+        public string Name { get; private set; }
+        public int Age { get; private set; }
+        public string Company { get; private set; }
 
         public Person(string name, int age, string company)
         {
